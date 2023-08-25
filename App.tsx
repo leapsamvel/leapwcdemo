@@ -38,7 +38,7 @@ import {
   BarcodeFormat,
   useScanBarcodes,
 } from "vision-camera-code-scanner";
-import 'react-native-reanimated';
+import Scanner from './scanner';
 
 const Section: React.FC<
   PropsWithChildren<{
@@ -145,6 +145,7 @@ const App = () => {
       if (uri.includes("wc:")) {
         if (uri.includes("@2")) {
           setCloseCamera(true);
+          setHasReadCode(true);
           try {
             console.log("Creating paring", uri);
             await web3wallet.core.pairing.pair({ uri, activatePairing: true });
@@ -152,6 +153,7 @@ const App = () => {
           }
           catch(e) {
             updateActiveSessions();
+            console.log('Pairing Error');
             console.log(e);
           }
           
@@ -175,6 +177,8 @@ const App = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [barcodes]);
+
+  
 
   const setPermissionData = (status: CameraPermissionStatus) => {
     setPermissionStatus(status);
@@ -205,9 +209,6 @@ const App = () => {
     setCloseCamera(false);
   };
 
-  console.log(hasPermission);
-
-
   useEffect(() => {
     updateActiveSessions();
     return () => {
@@ -217,19 +218,21 @@ const App = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <Button onPress={() =>{ requestCameraPermission()}} title="Camera button"/>
-      {devices?.back && hasPermission && !closeCamera && (
-          <Camera  
-            style={{height: '50%'}}
-            device={devices?.back}
-            isActive={barcodes.length === 0}
-            frameProcessor={frameProcessor}
-            frameProcessorFps={1}
+      <View>
+        <Button onPress={() =>{ requestCameraPermission()}} title="Open Scanner"/>
+        <Button onPress={() =>{ setCloseCamera(true)}} title="Close Scanner"/>
+      </View>
+      { !closeCamera && (
+          <Scanner
+          onCodeRead = {onCodeRead}
+          onCamClosed = {setCloseCamera}
+          hasPermission={hasPermission}
           />
       )}
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
+        <Text>Active Sessions</Text>
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,

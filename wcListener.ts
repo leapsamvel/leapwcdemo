@@ -15,20 +15,20 @@ function validateProposalPayload(payload: any) {
 }
 
 export function useInitWCV2Listeners(initialised: boolean) {
-  const handleSessionProposal = useCallback((payload) => {
+  const handleSessionProposal = useCallback(async (payload) => {
+    console.log('Session Proposal', payload);
     const isValidPayload = validateProposalPayload(payload);
     if (isValidPayload) {
-    //   navigation.navigate("WalletConnect", {
-    //     screen: "ConnectionDetails",
-    //     params: {
-    //       metadata: payload.params.proposer.metadata,
-    //       isRequest: true,
-    //       handshakeTopic: payload.params.topic,
-    //       isWCV2: true,
-    //       proposalPayloadId: payload.id,
-    //       payload: payload,
-    //     },
-    //   });
+      await web3wallet?.approveSession({
+        id: payload.id,
+        namespaces: {
+          cosmos: {
+            accounts: ["cosmos:cosmoshub-4:cosmos1laj8fjmxqymyknhuhggg52fxpuyrhw90nu7wqa"],
+            methods: payload.params.requiredNamespaces.cosmos.methods,
+            events: payload.params.requiredNamespaces.cosmos.events,
+          },
+        },
+      });
     } else {
       web3wallet.rejectSession({
         id: payload.id,
@@ -43,6 +43,7 @@ export function useInitWCV2Listeners(initialised: boolean) {
 
   const handleSessionRequest = useCallback(
     async (payload) => {
+      console.log('Session request', payload);
       const sessions = web3wallet.getActiveSessions();
       const requestedTopic = Object.keys(sessions).find(
         (topic) => topic === payload.topic
