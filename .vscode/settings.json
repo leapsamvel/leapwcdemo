@@ -1,0 +1,10 @@
+{
+    "search.exclude": {
+        "**/node_modules": false
+    },
+    "search.useParentIgnoreFiles": false,
+    "cSpell.words": [
+        "leapwallet",
+        "WALLETTYPE"
+    ]
+}
